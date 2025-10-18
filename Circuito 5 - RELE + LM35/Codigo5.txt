@@ -1,0 +1,41 @@
+const int sensorTemp = A0;
+const int relePin = 2;
+const float tempLimite = 30.0;
+
+void setup() {
+  pinMode(relePin, OUTPUT);
+  Serial.begin(9600);
+  
+}
+
+void loop() {
+  int leitura = analogRead(sensorTemp);
+
+  // Converter leitura para tensão (0 a 5V)
+  float tensao = leitura * (5.0 / 1023.0);
+
+  // Conversão linear com base nas características do sensor do Tinkercad
+  float temperatura = (100.0 * tensao) - 50.0;
+
+  // Exibir dados
+  Serial.print("Leitura ADC: ");
+  Serial.print(leitura);
+  Serial.print(" | Tensão: ");
+  Serial.print(tensao, 3);
+  Serial.print(" V | Temperatura: ");
+  Serial.print(temperatura, 1);
+  Serial.println(" °C");
+
+  // Controle do relé
+  if (temperatura > tempLimite) {
+    digitalWrite(relePin, HIGH);
+    Serial.println("** RELÉ ATIVADO **");
+  } else {
+    digitalWrite(relePin, LOW);
+    Serial.println("** RELÉ DESLIGADO **");
+  }
+
+  Serial.println("-----------------------------");
+  delay(1000);
+}
+

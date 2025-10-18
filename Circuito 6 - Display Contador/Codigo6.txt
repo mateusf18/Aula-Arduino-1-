@@ -1,0 +1,76 @@
+#include <LiquidCrystal.h>
+
+// Configuração dos pinos do LCD
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+const int buttonCount = 7;
+const int buttonReset = 8;
+const int ledPin = 13;
+
+int contador = 0;
+int lastCountState = HIGH;
+int lastResetState = HIGH;
+
+void setup() {
+  pinMode(buttonCount, INPUT_PULLUP);
+  pinMode(buttonReset, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  
+  lcd.begin(16, 2);
+  atualizarDisplay();
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Botão de contar
+  if (digitalRead(buttonCount) == LOW && lastCountState == HIGH) {
+    delay(50); // Debounce
+    contador++;
+    atualizarDisplay();
+    Serial.println("Contador: " + String(contador));
+    delay(300); // Delay para evitar múltiplos cliques
+  }
+  lastCountState = digitalRead(buttonCount);
+  
+  // Botão de reset
+  if (digitalRead(buttonReset) == LOW && lastResetState == HIGH) {
+    delay(50); // Debounce
+    contador = 0;
+    atualizarDisplay();
+    Serial.println("RESETADO!");
+    delay(300);
+  }
+  lastResetState = digitalRead(buttonReset);
+  
+  // Controla LED (acende em múltiplos de 10)
+  digitalWrite(ledPin, (contador % 10 == 0 && contador > 0) ? HIGH : LOW);
+}
+
+void atualizarDisplay() {
+  lcd.setCursor(0, 1);
+  
+  if (contador == 0) {
+    lcd.print("Zerado        ");
+  } else {
+    // Formata o número para sempre ocupar 4 espaços
+    if (contador < 10) {
+      lcd.print("   " + String(contador) + "  ");
+    } else if (contador < 100) {
+      lcd.print("  " + String(contador) + "  ");
+    } else if (contador < 1000) {
+      lcd.print(" " + String(contador) + "  ");
+    } else {
+      lcd.print(String(contador) + "  ");
+    }
+    
+    // Mostra qual casa decimal está ativa
+    lcd.setCursor(6, 1);
+    int casaDecimal = contador % 10;
+    lcd.print("D" + String(casaDecimal));
+  }
+  
+  // Mostra o valor completo na primeira linha
+  lcd.setCursor(0, 0);
+  lcd.print("Valor: " + String(contador) + "   ");
+}

@@ -1,0 +1,40 @@
+const int ledPin = 13;       // Pino do LED
+const int buttonPin = 2;     // Pino do botão
+
+int buttonState = 0;         // Estado atual do botão
+int lastButtonState = 0;     // Estado anterior do botão
+int blinkState = 0;          // Estado da piscada (0-3)
+
+unsigned long previousMillis = 0;  // Armazena o último tempo de piscada
+long intervals[] = {0, 1000, 500, 250}; // Intervalos: desligado, 1s, 0.5s, 0.25s
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP); // Usa resistor interno pull-up
+}
+
+void loop() {
+  // Verifica se o botão foi pressionado
+  buttonState = digitalRead(buttonPin);
+  
+  if (buttonState != lastButtonState) {
+    if (buttonState == LOW) {
+      // Avança para o próximo estado
+      blinkState = (blinkState + 1) % 4;
+    }
+    delay(50); // Debounce
+  }
+  lastButtonState = buttonState;
+
+  // Controla a piscada baseada no estado atual
+  unsigned long currentMillis = millis();
+  
+  if (blinkState > 0) { // Se não estiver desligado
+    if (currentMillis - previousMillis >= intervals[blinkState]) {
+      previousMillis = currentMillis;
+      digitalWrite(ledPin, !digitalRead(ledPin)); // Inverte o LED
+    }
+  } else {
+    digitalWrite(ledPin, LOW); // Mantém LED desligado
+  }
+}
